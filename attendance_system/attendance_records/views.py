@@ -14,10 +14,16 @@ class StudentForm(forms.ModelForm):
         fields = ['first_name', 'last_name', 'student_id', 'email']
 
 
+class CourseForm(forms.ModelForm):
+    class Meta:
+        model = Course
+        fields = ['name', 'code']
+
+
 class AttendanceForm(forms.ModelForm):
     class Meta:
         model = AttendanceRecord
-        fields = ['student', 'course', 'date', 'status', 'notes']
+        fields = ['student', 'course', 'semester', 'week', 'status', 'notes']
 
 
 class RoleContextMixin:
@@ -145,31 +151,36 @@ class TutorMarkAttendanceView(TutorAdminRequiredMixin, RoleContextMixin, generic
         context['courses'] = courses
         context['selected_course'] = None
         context['students'] = []
+        context['weeks'] = range(1, 19)  # 18 weeks
+        context['semesters'] = [(1, 'Semester 1'), (2, 'Semester 2')]
 
         course_id = self.request.GET.get('course')
-        selected_date = self.request.GET.get('date')
+        semester = self.request.GET.get('semester')
+        week = self.request.GET.get('week')
 
-        if course_id:
+        if course_id and semester and week:
             selected_course = get_object_or_404(Course, pk=course_id)
             context['selected_course'] = selected_course
-
-            if selected_date:
-                context['selected_date'] = selected_date
-                students = Student.objects.all().order_by('last_name', 'first_name')
-                context['students'] = students
-                context['attendance_records'] = {
-                    record.student_id: record
-                    for record in AttendanceRecord.objects.filter(
-                        course=selected_course,
-                        date=selected_date
-                    )
-                }
+            context['selected_semester'] = int(semester)
+            context['selected_week'] = int(week)
+            
+            students = Student.objects.all().order_by('last_name', 'first_name')
+            context['students'] = students
+            context['attendance_records'] = {
+                record.student_id: record
+                for record in AttendanceRecord.objects.filter(
+                    course=selected_course,
+                    semester=semester,
+                    week=week
+                )
+            }
 
         return context
 
     def post(self, request, *args, **kwargs):
         course_id = request.POST.get('course')
-        selected_date = request.POST.get('date')
+        semester = request.POST.get('semester')
+        week = request.POST.get('week')
         course = get_object_or_404(Course, pk=course_id)
 
         students = Student.objects.all()
@@ -181,11 +192,42 @@ class TutorMarkAttendanceView(TutorAdminRequiredMixin, RoleContextMixin, generic
                 record, _ = AttendanceRecord.objects.get_or_create(
                     student=student,
                     course=course,
-                    date=selected_date,
+                    semester=semester,
+                    week=week,
                     defaults={'status': status, 'notes': notes}
                 )
                 record.status = status
                 record.notes = notes
                 record.save()
 
-        return redirect(f"{reverse_lazy('attendance_records:tutor_mark')}?course={course_id}&date={selected_date}")
+        return redirect(f"{reverse_lazy('attendance_records:tutor_mark')}?course={course_id}&semester={semester}&week={week}")
+
+
+@method_decorator(login_required(login_url='attendance_records:login'), name='dispatch')
+class CourseListView(AdminRequiredMixin, RoleContextMixin, generic.ListView):
+    model = Course
+    template_name = 'attendance_records/course_list.html'
+    context_object_name = 'courses'
+
+
+@method_decorator(login_required(login_url='attendance_records:login'), name='dispatch')
+class CourseCreateView(AdminRequiredMixin, RoleContextMixin, generic.CreateView):
+    model = Course
+    form_class = CourseForm
+    template_name = 'attendance_records/course_form.html'
+    success_url = reverse_lazy('attendance_records:courses_list')
+
+
+@method_decorator(login_required(login_url='attendance_records:login'), name='dispatch')
+class CourseUpdateView(AdminRequiredMixin, RoleContextMixin, generic.UpdateView):
+    model = Course
+    form_class = CourseForm
+    template_name = 'attendance_records/course_form.html'
+    success_url = reverse_lazy('attendance_records:courses_list')
+
+
+@method_decorator(login_required(login_url='attendance_records:login'), name='dispatch')
+class CourseDeleteView(AdminRequiredMixin, RoleContextMixin, generic.DeleteView):
+    model = Course
+    template_name = 'attendance_records/course_confirm_delete.html'
+    success_url = reverse_lazy('attendance_records:courses_list')

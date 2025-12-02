@@ -1,0 +1,14 @@
+{% extends 'attendance_records/base.html' %}
+
+{% block title %}{% if object %}Edit{% else %}Add{% endif %} Course{% endblock %}
+
+{% block heading %}{% if object %}Edit{% else %}Add{% endif %} Course{% endblock %}
+
+{% block content %}
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a class="btn btn-secondary" href="{% url 'attendance_records:courses_list' %}">Cancel</a>
+  </form>
+{% endblock %}

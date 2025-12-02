@@ -1,0 +1,41 @@
+{% extends 'attendance_records/base.html' %}
+
+{% block title %}Courses{% endblock %}
+
+{% block heading %}Courses{% endblock %}
+
+{% block content %}
+  <div class="mb-3">Role: {{ user_role }}</div>
+  {% if user_role == 'admin' %}
+    <div style="width:100px;height:100px;background:purple;margin-bottom:12px;"></div>
+  {% endif %}
+
+  <p>
+    <a class="btn btn-primary" href="{% url 'attendance_records:courses_add' %}">Add Course</a>
+    <a class="btn btn-secondary" href="{% url 'attendance_records:index' %}">Home</a>
+  </p>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Code</th>
+        <th>Name</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for course in courses %}
+      <tr>
+        <td>{{ course.code }}</td>
+        <td>{{ course.name }}</td>
+        <td>
+          <a class="btn btn-sm btn-outline-secondary" href="{% url 'attendance_records:courses_edit' course.pk %}">Edit</a>
+          <a class="btn btn-sm btn-outline-danger" href="{% url 'attendance_records:courses_delete' course.pk %}">Delete</a>
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="3">No courses yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

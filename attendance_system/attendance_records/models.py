@@ -34,16 +34,23 @@ class AttendanceRecord(models.Model):
         (STATUS_LATE, 'Late'),
     ]
 
+    SEMESTER_CHOICES = [
+        (1, 'Semester 1'),
+        (2, 'Semester 2'),
+    ]
+
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='attendances')
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='attendances')
-    date = models.DateField()
+    semester = models.IntegerField(choices=SEMESTER_CHOICES, default=1)
+    week = models.IntegerField(help_text='Week number (1-18)')
+    date = models.DateField(blank=True, null=True)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default=STATUS_PRESENT)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-date', 'student']
-        unique_together = ('student', 'course', 'date')
+        ordering = ['-semester', '-week', 'student']
+        unique_together = ('student', 'course', 'semester', 'week')
 
     def __str__(self):
-        return f"{self.date} - {self.student} - {self.get_status_display()}"
+        return f"Sem {self.semester} Week {self.week} - {self.student} - {self.get_status_display()}"

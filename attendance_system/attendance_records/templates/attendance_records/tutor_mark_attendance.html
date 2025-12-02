@@ -17,10 +17,10 @@
 
   <div class="card">
     <div class="card-body">
-      <h5 class="card-title">Select Course and Date</h5>
+      <h5 class="card-title">Select Course, Semester, and Week</h5>
       <form method="get">
         <div class="row mb-3">
-          <div class="col-md-6">
+          <div class="col-md-4">
             <label class="form-label">Course</label>
             <select name="course" class="form-select" required>
               <option value="">-- Choose a course --</option>
@@ -31,9 +31,27 @@
               {% endfor %}
             </select>
           </div>
-          <div class="col-md-6">
-            <label class="form-label">Date</label>
-            <input type="date" name="date" class="form-control" {% if request.GET.date %}value="{{ request.GET.date }}"{% endif %} required>
+          <div class="col-md-4">
+            <label class="form-label">Semester</label>
+            <select name="semester" class="form-select" required>
+              <option value="">-- Choose semester --</option>
+              {% for sem_value, sem_label in semesters %}
+                <option value="{{ sem_value }}" {% if selected_semester == sem_value %}selected{% endif %}>
+                  {{ sem_label }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Week</label>
+            <select name="week" class="form-select" required>
+              <option value="">-- Choose week --</option>
+              {% for w in weeks %}
+                <option value="{{ w }}" {% if selected_week == w %}selected{% endif %}>
+                  Week {{ w }}
+                </option>
+              {% endfor %}
+            </select>
           </div>
         </div>
         <button type="submit" class="btn btn-primary">Load Students</button>
@@ -43,11 +61,12 @@
 
   {% if selected_course and students %}
     <div class="mt-4">
-      <h3>Mark Attendance for {{ selected_course.code }} - {{ selected_date }}</h3>
+      <h3>Mark Attendance for {{ selected_course.code }} - Semester {{ selected_semester }}, Week {{ selected_week }}</h3>
       <form method="post">
         {% csrf_token %}
         <input type="hidden" name="course" value="{{ selected_course.id }}">
-        <input type="hidden" name="date" value="{{ selected_date }}">
+        <input type="hidden" name="semester" value="{{ selected_semester }}">
+        <input type="hidden" name="week" value="{{ selected_week }}">
         
         <table class="table table-striped">
           <thead>
@@ -84,6 +103,6 @@
       </form>
     </div>
   {% elif selected_course and not students %}
-    <div class="alert alert-info mt-4">Select a date and submit to load students.</div>
+    <div class="alert alert-info mt-4">Select a semester, week and submit to load students.</div>
   {% endif %}
 {% endblock %}
