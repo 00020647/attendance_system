@@ -27,12 +27,12 @@ class Student(models.Model):
 class AttendanceRecord(models.Model):
     STATUS_PRESENT = 'P'
     STATUS_ABSENT = 'A'
-    STATUS_LATE = 'L'
+    STATUS_EXCUSED = 'E'
 
     STATUS_CHOICES = [
         (STATUS_PRESENT, 'Present'),
         (STATUS_ABSENT, 'Absent'),
-        (STATUS_LATE, 'Late'),
+        (STATUS_EXCUSED, 'Late'),
     ]
 
     SEMESTER_CHOICES = [

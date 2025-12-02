@@ -11,7 +11,10 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 class StudentForm(forms.ModelForm):
     class Meta:
         model = Student
-        fields = ['first_name', 'last_name', 'student_id', 'email']
+        fields = ['first_name', 'last_name', 'student_id', 'email', 'courses']
+        widgets = {
+            'courses': forms.CheckboxSelectMultiple(),
+        }
 
 
 class CourseForm(forms.ModelForm):
@@ -164,7 +167,11 @@ class TutorMarkAttendanceView(TutorAdminRequiredMixin, RoleContextMixin, generic
             context['selected_semester'] = int(semester)
             context['selected_week'] = int(week)
             
-            students = Student.objects.all().order_by('last_name', 'first_name')
+            # Filter students who are enrolled in the selected course
+            students = Student.objects.filter(
+                courses=selected_course
+            ).order_by('last_name', 'first_name')
+            
             context['students'] = students
             context['attendance_records'] = {
                 record.student_id: record
@@ -183,7 +190,9 @@ class TutorMarkAttendanceView(TutorAdminRequiredMixin, RoleContextMixin, generic
         week = request.POST.get('week')
         course = get_object_or_404(Course, pk=course_id)
 
-        students = Student.objects.all()
+        # Filter students who are enrolled in this course
+        students = Student.objects.filter(courses=course)
+        
         for student in students:
             status = request.POST.get(f'status_{student.id}')
             notes = request.POST.get(f'notes_{student.id}', '')

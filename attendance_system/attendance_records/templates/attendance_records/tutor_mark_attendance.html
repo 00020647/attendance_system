@@ -74,7 +74,6 @@
               <th>Student ID</th>
               <th>Name</th>
               <th>Status</th>
-              <th>Notes</th>
             </tr>
           </thead>
           <tbody>
@@ -84,15 +83,32 @@
                 <td>{{ student.student_id }}</td>
                 <td>{{ student.first_name }} {{ student.last_name }}</td>
                 <td>
-                  <select name="status_{{ student.id }}" class="form-select form-select-sm" required>
-                    <option value="">-- Select --</option>
-                    <option value="P" {% if record.status == 'P' %}selected{% endif %}>Present</option>
-                    <option value="A" {% if record.status == 'A' %}selected{% endif %}>Absent</option>
-                    <option value="L" {% if record.status == 'L' %}selected{% endif %}>Late</option>
-                  </select>
-                </td>
-                <td>
-                  <textarea name="notes_{{ student.id }}" class="form-control form-control-sm" rows="1">{% if record %}{{ record.notes }}{% endif %}</textarea>
+                  <div class="d-flex gap-3">
+                    <div class="form-check">
+                      <input class="form-check-input radio-deselect" type="radio" name="status_{{ student.id }}" 
+                             id="present_{{ student.id }}" value="P" 
+                             {% if record.status == 'P' %}checked{% endif %}>
+                      <label class="form-check-label" for="present_{{ student.id }}">
+                        Present
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input radio-deselect" type="radio" name="status_{{ student.id }}" 
+                             id="absent_{{ student.id }}" value="A" 
+                             {% if record.status == 'A' %}checked{% endif %}>
+                      <label class="form-check-label" for="absent_{{ student.id }}">
+                        Absent
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input radio-deselect" type="radio" name="status_{{ student.id }}" 
+                             id="excused_{{ student.id }}" value="E" 
+                             {% if record.status == 'E' %}checked{% endif %}>
+                      <label class="form-check-label" for="excused_{{ student.id }}">
+                        Excused
+                      </label>
+                    </div>
+                  </div>
                 </td>
               </tr>
               {% endwith %}
@@ -103,6 +119,35 @@
       </form>
     </div>
   {% elif selected_course and not students %}
-    <div class="alert alert-info mt-4">Select a semester, week and submit to load students.</div>
+    <div class="alert alert-info mt-4">No students enrolled in this course.</div>
   {% endif %}
+
+  <script>
+    // Enable deselecting radio buttons by clicking them again
+    document.addEventListener('DOMContentLoaded', function() {
+      const radios = document.querySelectorAll('.radio-deselect');
+      
+      radios.forEach(radio => {
+        radio.addEventListener('click', function(e) {
+          // If this radio was already checked, uncheck it
+          if (this.dataset.wasChecked === 'true') {
+            this.checked = false;
+            this.dataset.wasChecked = 'false';
+          } else {
+            // Mark this one as checked and clear the flag from others in the group
+            const groupName = this.name;
+            document.querySelectorAll(`input[name="${groupName}"]`).forEach(r => {
+              r.dataset.wasChecked = 'false';
+            });
+            this.dataset.wasChecked = 'true';
+          }
+        });
+        
+        // Initialize the wasChecked state
+        if (radio.checked) {
+          radio.dataset.wasChecked = 'true';
+        }
+      });
+    });
+  </script>
 {% endblock %}
