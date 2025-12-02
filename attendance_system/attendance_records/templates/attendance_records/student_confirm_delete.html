@@ -1,0 +1,14 @@
+{% extends 'attendance_records/base.html' %}
+
+{% block title %}Delete Student{% endblock %}
+
+{% block heading %}Delete Student{% endblock %}
+
+{% block content %}
+  <p>Are you sure you want to delete {{ object }}?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Confirm</button>
+    <a class="btn btn-secondary" href="{% url 'attendance_records:students_list' %}">Cancel</a>
+  </form>
+{% endblock %}

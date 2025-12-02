@@ -1,0 +1,73 @@
+{% extends 'attendance_records/base.html' %}
+
+{% block title %}My Attendance{% endblock %}
+
+{% block heading %}My Attendance{% endblock %}
+
+{% block content %}
+  <div class="mb-3">Role: <strong>{{ user_role }}</strong></div>
+  {% if user_role == 'student' %}
+    <div style="width:100px;height:100px;background:blue;margin-bottom:20px;"></div>
+  {% endif %}
+
+  <a class="btn btn-secondary mb-3" href="{% url 'attendance_records:index' %}">Home</a>
+
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Select Course</h5>
+      <form method="get">
+        <div class="row">
+          <div class="col-md-6">
+            <select name="course" class="form-select" onchange="this.form.submit();">
+              <option value="">-- Choose a course --</option>
+              {% for course in courses %}
+                <option value="{{ course.id }}" {% if selected_course.id == course.id %}selected{% endif %}>
+                  {{ course.code }} - {{ course.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if selected_course %}
+    <div class="mt-4">
+      <h3>Attendance for {{ selected_course.code }}</h3>
+      {% if attendance_records %}
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for record in attendance_records %}
+              <tr>
+                <td>{{ record.date }}</td>
+                <td>
+                  <span class="badge {% if record.status == 'P' %}bg-success{% elif record.status == 'A' %}bg-danger{% else %}bg-warning{% endif %}">
+                    {{ record.get_status_display }}
+                  </span>
+                </td>
+                <td>{{ record.notes }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <div class="mt-3">
+          <p><strong>Summary:</strong></p>
+          <ul>
+            <li>Total Classes: {{ attendance_records.count }}</li>
+            <li>Present: {{ attendance_records|dictsort:"status"|length }}</li>
+          </ul>
+        </div>
+      {% else %}
+        <div class="alert alert-info mt-3">No attendance records yet for this course.</div>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endblock %}

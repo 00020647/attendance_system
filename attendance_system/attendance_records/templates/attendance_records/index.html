@@ -1,0 +1,76 @@
+{% extends 'attendance_records/base.html' %}
+
+{% block title %}Attendance System{% endblock %}
+
+{% block heading %}Attendance System{% endblock %}
+
+{% block content %}
+  {% if user.is_authenticated %}
+    <p>Welcome, role: <strong>{{ request.user_role }}</strong></p>
+    <div class="my-3">
+      {% if request.user_role == 'student' %}
+        <div style="width:100px;height:100px;background:blue;"></div>
+      {% elif request.user_role == 'tutor' %}
+        <div style="width:100px;height:100px;background:red;"></div>
+      {% elif request.user_role == 'admin' %}
+        <div style="width:100px;height:100px;background:purple;"></div>
+      {% endif %}
+    </div>
+
+    <div class="row mt-4">
+      {% if request.user_role == 'student' %}
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">My Attendance</h5>
+              <p class="card-text">View your attendance records by course.</p>
+              <a href="{% url 'attendance_records:student_dashboard' %}" class="btn btn-primary">View Dashboard</a>
+            </div>
+          </div>
+        </div>
+      {% elif request.user_role == 'tutor' %}
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Mark Attendance</h5>
+              <p class="card-text">Mark attendance for your students.</p>
+              <a href="{% url 'attendance_records:tutor_mark' %}" class="btn btn-primary">Mark Attendance</a>
+            </div>
+          </div>
+        </div>
+      {% elif request.user_role == 'admin' %}
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Manage Students</h5>
+              <p class="card-text">Add, edit, or delete students.</p>
+              <a href="{% url 'attendance_records:students_list' %}" class="btn btn-primary">Manage</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">View Attendance</h5>
+              <p class="card-text">View all attendance records.</p>
+              <a href="{% url 'attendance_records:attendance_list' %}" class="btn btn-primary">View</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Mark Attendance</h5>
+              <p class="card-text">Mark attendance for students.</p>
+              <a href="{% url 'attendance_records:tutor_mark' %}" class="btn btn-primary">Mark</a>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      <p>Please <a href="{% url 'attendance_records:login' %}" class="alert-link">login</a> to access the system.</p>
+    </div>
+  {% endif %}
+{% endblock %}

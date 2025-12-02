@@ -1,0 +1,46 @@
+{% extends 'attendance_records/base.html' %}
+
+{% block title %}Students{% endblock %}
+
+{% block heading %}Students{% endblock %}
+
+{% block content %}
+  <div class="mb-3">Role: {{ user_role }}</div>
+  {% if user_role == 'student' %}
+    <div style="width:100px;height:100px;background:blue;margin-bottom:12px;"></div>
+  {% elif user_role == 'tutor' %}
+    <div style="width:100px;height:100px;background:red;margin-bottom:12px;"></div>
+  {% elif user_role == 'admin' %}
+    <div style="width:100px;height:100px;background:purple;margin-bottom:12px;"></div>
+  {% endif %}
+
+  <p><a class="btn btn-primary" href="{% url 'attendance_records:students_add' %}">Add Student</a>
+     <a class="btn btn-secondary" href="{% url 'attendance_records:index' %}">Home</a>
+  </p>
+  
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Student ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for s in students %}
+      <tr>
+        <td>{{ s.student_id }}</td>
+        <td>{{ s.first_name }} {{ s.last_name }}</td>
+        <td>{{ s.email }}</td>
+        <td>
+          <a class="btn btn-sm btn-outline-secondary" href="{% url 'attendance_records:students_edit' s.pk %}">Edit</a>
+          <a class="btn btn-sm btn-outline-danger" href="{% url 'attendance_records:students_delete' s.pk %}">Delete</a>
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="4">No students yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
