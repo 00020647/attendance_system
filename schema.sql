@@ -46,3 +46,22 @@ CREATE TABLE attendance_records_attendancerecord (
     FOREIGN KEY (course_id) REFERENCES attendance_records_course(id) ON DELETE CASCADE,
     UNIQUE (student_id, course_id, semester, week)
 );
+
+CREATE TABLE attendance_records_tutor (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    tutor_id VARCHAR(30) UNIQUE NOT NULL,
+    password VARCHAR(128) NOT NULL,
+    email VARCHAR(254),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE attendance_records_tutor_courses (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tutor_id INT NOT NULL,
+    course_id INT NOT NULL,
+    FOREIGN KEY (tutor_id) REFERENCES attendance_records_tutor(id) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES attendance_records_course(id) ON DELETE CASCADE,
+    UNIQUE (tutor_id, course_id)
+);

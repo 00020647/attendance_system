@@ -90,8 +90,9 @@ DATABASES = {
 }
 
 AUTHENTICATION_BACKENDS = [
-    'attendance_records.auth_backends.StudentAuthBackend',  # Custom student auth
-    'django.contrib.auth.backends.ModelBackend',  # Default Django auth (for admin/staff)
+    'attendance_records.auth_backends.TutorAuthBackend',
+    'attendance_records.auth_backends.StudentAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
 # Password validation

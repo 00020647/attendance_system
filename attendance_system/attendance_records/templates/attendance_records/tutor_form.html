@@ -1,0 +1,135 @@
+{% extends "attendance_records/base.html" %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}Add{% endif %} Tutor{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>{% if form.instance.pk %}Edit{% else %}Add New{% endif %} Tutor</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name *</label>
+                                <input type="text" name="first_name" value="{{ form.first_name.value|default:'' }}" 
+                                       class="form-control {% if form.first_name.errors %}is-invalid{% endif %}" 
+                                       id="{{ form.first_name.id_for_label }}" required>
+                                {% if form.first_name.errors %}
+                                <div class="invalid-feedback d-block">{{ form.first_name.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name *</label>
+                                <input type="text" name="last_name" value="{{ form.last_name.value|default:'' }}" 
+                                       class="form-control {% if form.last_name.errors %}is-invalid{% endif %}" 
+                                       id="{{ form.last_name.id_for_label }}" required>
+                                {% if form.last_name.errors %}
+                                <div class="invalid-feedback d-block">{{ form.last_name.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.tutor_id.id_for_label }}" class="form-label">Tutor ID *</label>
+                                <input type="text" name="tutor_id" value="{{ form.tutor_id.value|default:'' }}" 
+                                       class="form-control {% if form.tutor_id.errors %}is-invalid{% endif %}" 
+                                       id="{{ form.tutor_id.id_for_label }}" required>
+                                {% if form.tutor_id.errors %}
+                                <div class="invalid-feedback d-block">{{ form.tutor_id.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">Unique identifier for login</small>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                                <input type="email" name="email" value="{{ form.email.value|default:'' }}" 
+                                       class="form-control {% if form.email.errors %}is-invalid{% endif %}" 
+                                       id="{{ form.email.id_for_label }}">
+                                {% if form.email.errors %}
+                                <div class="invalid-feedback d-block">{{ form.email.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.password.id_for_label }}" class="form-label">
+                                    Password {% if not form.instance.pk %}*{% endif %}
+                                </label>
+                                <input type="password" name="password" 
+                                       class="form-control {% if form.password.errors %}is-invalid{% endif %}" 
+                                       id="{{ form.password.id_for_label }}" 
+                                       {% if not form.instance.pk %}required{% endif %}>
+                                {% if form.password.errors %}
+                                <div class="invalid-feedback d-block">{{ form.password.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">{{ form.password.help_text }}</small>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.password_confirm.id_for_label }}" class="form-label">
+                                    Confirm Password
+                                </label>
+                                <input type="password" name="password_confirm" 
+                                       class="form-control {% if form.password_confirm.errors %}is-invalid{% endif %}" 
+                                       id="{{ form.password_confirm.id_for_label }}">
+                                {% if form.password_confirm.errors %}
+                                <div class="invalid-feedback d-block">{{ form.password_confirm.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Assigned Courses</label>
+                            <div class="courses-checkboxes">
+                                {{ form.courses }}
+                            </div>
+                            {% if form.courses.errors %}
+                            <div class="text-danger">{{ form.courses.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'attendance_records:tutors_list' %}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> {% if form.instance.pk %}Update{% else %}Create{% endif %} Tutor
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .courses-checkboxes ul {
+        list-style: none;
+        padding-left: 0;
+    }
+    
+    .courses-checkboxes li {
+        margin-bottom: 8px;
+    }
+    
+    .courses-checkboxes label {
+        margin-left: 8px;
+    }
+</style>
+{% endblock %}

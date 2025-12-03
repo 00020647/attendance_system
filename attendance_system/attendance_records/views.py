@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import generic
-from .models import Student, Course, AttendanceRecord
+from .models import Student, Course, AttendanceRecord, Tutor
 from django import forms
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -28,7 +28,6 @@ class StudentForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Make passport_data not required for updates
         if self.instance.pk:
             self.fields['passport_data'].required = False
             self.fields['passport_data'].help_text = "Leave blank to keep current passport data"
@@ -38,7 +37,6 @@ class StudentForm(forms.ModelForm):
         passport_data = cleaned_data.get('passport_data')
         passport_data_confirm = cleaned_data.get('passport_data_confirm')
         
-        # Only validate if passport_data is provided
         if passport_data:
             if passport_data_confirm and passport_data != passport_data_confirm:
                 raise forms.ValidationError("Passport data fields must match")
@@ -49,7 +47,6 @@ class StudentForm(forms.ModelForm):
         student = super().save(commit=False)
         passport_data = self.cleaned_data.get('passport_data')
         
-        # Only update passport_data if a new one is provided
         if passport_data:
             student.set_passport_data(passport_data)
         
@@ -58,6 +55,55 @@ class StudentForm(forms.ModelForm):
             self.save_m2m()
         
         return student
+
+
+class TutorForm(forms.ModelForm):
+    password = forms.CharField(
+        widget=forms.PasswordInput(),
+        help_text="Enter password (will be encrypted)"
+    )
+    password_confirm = forms.CharField(
+        widget=forms.PasswordInput(),
+        label="Confirm Password",
+        required=False
+    )
+    
+    class Meta:
+        model = Tutor
+        fields = ['first_name', 'last_name', 'tutor_id', 'email', 'password', 'courses']
+        widgets = {
+            'courses': forms.CheckboxSelectMultiple(),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            self.fields['password'].required = False
+            self.fields['password'].help_text = "Leave blank to keep current password"
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        password_confirm = cleaned_data.get('password_confirm')
+        
+        if password:
+            if password_confirm and password != password_confirm:
+                raise forms.ValidationError("Password fields must match")
+        
+        return cleaned_data
+    
+    def save(self, commit=True):
+        tutor = super().save(commit=False)
+        password = self.cleaned_data.get('password')
+        
+        if password:
+            tutor.set_password(password)
+        
+        if commit:
+            tutor.save()
+            self.save_m2m()
+        
+        return tutor
 
 
 class CourseForm(forms.ModelForm):
@@ -283,3 +329,33 @@ class CourseDeleteView(AdminRequiredMixin, RoleContextMixin, generic.DeleteView)
     model = Course
     template_name = 'attendance_records/course_confirm_delete.html'
     success_url = reverse_lazy('attendance_records:courses_list')
+
+
+@method_decorator(login_required(login_url='attendance_records:login'), name='dispatch')
+class TutorListView(AdminRequiredMixin, RoleContextMixin, generic.ListView):
+    model = Tutor
+    template_name = 'attendance_records/tutor_list.html'
+    context_object_name = 'tutors'
+
+
+@method_decorator(login_required(login_url='attendance_records:login'), name='dispatch')
+class TutorCreateView(AdminRequiredMixin, RoleContextMixin, generic.CreateView):
+    model = Tutor
+    form_class = TutorForm
+    template_name = 'attendance_records/tutor_form.html'
+    success_url = reverse_lazy('attendance_records:tutors_list')
+
+
+@method_decorator(login_required(login_url='attendance_records:login'), name='dispatch')
+class TutorUpdateView(AdminRequiredMixin, RoleContextMixin, generic.UpdateView):
+    model = Tutor
+    form_class = TutorForm
+    template_name = 'attendance_records/tutor_form.html'
+    success_url = reverse_lazy('attendance_records:tutors_list')
+
+
+@method_decorator(login_required(login_url='attendance_records:login'), name='dispatch')
+class TutorDeleteView(AdminRequiredMixin, RoleContextMixin, generic.DeleteView):
+    model = Tutor
+    template_name = 'attendance_records/tutor_confirm_delete.html'
+    success_url = reverse_lazy('attendance_records:tutors_list')

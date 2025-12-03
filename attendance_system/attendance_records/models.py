@@ -13,7 +13,7 @@ class Student(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     student_id = models.CharField(max_length=30, unique=True)
-    passport_data = models.CharField(max_length=128, default='')  
+    passport_data = models.CharField(max_length=128, default='')
     email = models.EmailField(blank=True)
     courses = models.ManyToManyField(Course, related_name='students', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -31,6 +31,30 @@ class Student(models.Model):
     def check_passport_data(self, raw_password):
         """Verify the passport data"""
         return check_password(raw_password, self.passport_data)
+
+
+class Tutor(models.Model):
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    tutor_id = models.CharField(max_length=30, unique=True)
+    password = models.CharField(max_length=128)
+    email = models.EmailField(blank=True)
+    courses = models.ManyToManyField(Course, related_name='tutors', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['last_name', 'first_name']
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ({self.tutor_id})"
+
+    def set_password(self, raw_password):
+        """Hash and set the password"""
+        self.password = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        """Verify the password"""
+        return check_password(raw_password, self.password)
 
 
 class AttendanceRecord(models.Model):
