@@ -9,12 +9,55 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 
 
 class StudentForm(forms.ModelForm):
+    passport_data = forms.CharField(
+        widget=forms.PasswordInput(),
+        help_text="Enter passport data (will be encrypted)"
+    )
+    passport_data_confirm = forms.CharField(
+        widget=forms.PasswordInput(),
+        label="Confirm Passport Data",
+        required=False
+    )
+    
     class Meta:
         model = Student
-        fields = ['first_name', 'last_name', 'student_id', 'email', 'courses']
+        fields = ['first_name', 'last_name', 'student_id', 'email', 'passport_data', 'courses']
         widgets = {
             'courses': forms.CheckboxSelectMultiple(),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make passport_data not required for updates
+        if self.instance.pk:
+            self.fields['passport_data'].required = False
+            self.fields['passport_data'].help_text = "Leave blank to keep current passport data"
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        passport_data = cleaned_data.get('passport_data')
+        passport_data_confirm = cleaned_data.get('passport_data_confirm')
+        
+        # Only validate if passport_data is provided
+        if passport_data:
+            if passport_data_confirm and passport_data != passport_data_confirm:
+                raise forms.ValidationError("Passport data fields must match")
+        
+        return cleaned_data
+    
+    def save(self, commit=True):
+        student = super().save(commit=False)
+        passport_data = self.cleaned_data.get('passport_data')
+        
+        # Only update passport_data if a new one is provided
+        if passport_data:
+            student.set_passport_data(passport_data)
+        
+        if commit:
+            student.save()
+            self.save_m2m()
+        
+        return student
 
 
 class CourseForm(forms.ModelForm):
