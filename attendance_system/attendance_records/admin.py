@@ -14,7 +14,7 @@ class TutorAdmin(admin.ModelAdmin):
     list_display = ('tutor_id', 'first_name', 'last_name', 'email', 'created_at')
     search_fields = ('tutor_id', 'first_name', 'last_name', 'email')
     filter_horizontal = ('courses',)
-    exclude = ('password',)
+    exclude = ('passport_data',) 
 
 
 @admin.register(Course)

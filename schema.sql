@@ -52,7 +52,7 @@ CREATE TABLE attendance_records_tutor (
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     tutor_id VARCHAR(30) UNIQUE NOT NULL,
-    password VARCHAR(128) NOT NULL,
+    passport_data VARCHAR(128) NOT NULL DEFAULT '',
     email VARCHAR(254),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

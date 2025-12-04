@@ -10,11 +10,12 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 
 class StudentForm(forms.ModelForm):
     passport_data = forms.CharField(
-        widget=forms.PasswordInput(),
-        help_text="Enter passport data (will be encrypted)"
+        widget=forms.PasswordInput(render_value=False),
+        help_text="Enter passport data (will be encrypted)",
+        required=False
     )
     passport_data_confirm = forms.CharField(
-        widget=forms.PasswordInput(),
+        widget=forms.PasswordInput(render_value=False),
         label="Confirm Passport Data",
         required=False
     )
@@ -29,16 +30,28 @@ class StudentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance.pk:
+            # If editing existing student
             self.fields['passport_data'].required = False
             self.fields['passport_data'].help_text = "Leave blank to keep current passport data"
+        else:
+            # If creating new student, make passport_data required
+            self.fields['passport_data'].required = True
+            self.fields['passport_data'].help_text = "Enter passport data (will be encrypted)"
     
     def clean(self):
         cleaned_data = super().clean()
         passport_data = cleaned_data.get('passport_data')
         passport_data_confirm = cleaned_data.get('passport_data_confirm')
         
+        # If creating new student, passport_data is required
+        if not self.instance.pk and not passport_data:
+            raise forms.ValidationError("Passport data is required for new students")
+        
+        # If passport_data is provided, check confirmation matches
         if passport_data:
-            if passport_data_confirm and passport_data != passport_data_confirm:
+            if not passport_data_confirm:
+                raise forms.ValidationError("Please confirm the passport data")
+            if passport_data != passport_data_confirm:
                 raise forms.ValidationError("Passport data fields must match")
         
         return cleaned_data
@@ -47,30 +60,48 @@ class StudentForm(forms.ModelForm):
         student = super().save(commit=False)
         passport_data = self.cleaned_data.get('passport_data')
         
+        # Only update passport_data if it was provided
         if passport_data:
             student.set_passport_data(passport_data)
         
         if commit:
             student.save()
             self.save_m2m()
+
+            # Create Django User account for student login
+            from django.contrib.auth.models import User, Group
+            user, user_created = User.objects.update_or_create(
+                username=student.student_id,
+                defaults={
+                    'first_name': student.first_name,
+                    'last_name': student.last_name,
+                    'email': student.email,
+                }
+            )
+
+            # Ensure student is in 'Students' group
+            students_group, _ = Group.objects.get_or_create(name='Students')
+            user.groups.clear()
+            user.groups.add(students_group)
         
         return student
 
 
 class TutorForm(forms.ModelForm):
-    password = forms.CharField(
-        widget=forms.PasswordInput(),
-        help_text="Enter password (will be encrypted)"
+    passport_data = forms.CharField(
+        widget=forms.PasswordInput(render_value=False),
+        help_text="Enter passport data (will be encrypted)",
+        required=False
     )
-    password_confirm = forms.CharField(
-        widget=forms.PasswordInput(),
-        label="Confirm Password",
+    passport_data_confirm = forms.CharField(
+        widget=forms.PasswordInput(render_value=False),
+        label="Confirm Passport Data",
         required=False
     )
     
     class Meta:
         model = Tutor
-        fields = ['first_name', 'last_name', 'tutor_id', 'email', 'password', 'courses']
+        fields = ['first_name', 'last_name', 'tutor_id', 'email', 'passport_data', 'courses']
         widgets = {
             'courses': forms.CheckboxSelectMultiple(),
         }
@@ -78,30 +109,59 @@ class TutorForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance.pk:
-            self.fields['password'].required = False
-            self.fields['password'].help_text = "Leave blank to keep current password"
+            # If editing existing tutor
+            self.fields['passport_data'].required = False
+            self.fields['passport_data'].help_text = "Leave blank to keep current passport data"
+        else:
+            # If creating new tutor, make passport_data required
+            self.fields['passport_data'].required = True
+            self.fields['passport_data'].help_text = "Enter passport data (will be encrypted)"
     
     def clean(self):
         cleaned_data = super().clean()
-        password = cleaned_data.get('password')
-        password_confirm = cleaned_data.get('password_confirm')
+        passport_data = cleaned_data.get('passport_data')
+        passport_data_confirm = cleaned_data.get('passport_data_confirm')
         
-        if password:
-            if password_confirm and password != password_confirm:
-                raise forms.ValidationError("Password fields must match")
+        # If creating new tutor, passport_data is required
+        if not self.instance.pk and not passport_data:
+            raise forms.ValidationError("Passport data is required for new tutors")
+        
+        # If passport_data is provided, check confirmation matches
+        if passport_data:
+            if not passport_data_confirm:
+                raise forms.ValidationError("Please confirm the passport data")
+            if passport_data != passport_data_confirm:
+                raise forms.ValidationError("Passport data fields must match")
         
         return cleaned_data
     
     def save(self, commit=True):
         tutor = super().save(commit=False)
-        password = self.cleaned_data.get('password')
+        passport_data = self.cleaned_data.get('passport_data')
         
-        if password:
-            tutor.set_password(password)
+        # Only update passport_data if it was provided
+        if passport_data:
+            tutor.set_passport_data(passport_data)
         
         if commit:
             tutor.save()
             self.save_m2m()
+
+            # Create Django User account for tutor login
+            from django.contrib.auth.models import User, Group
+            user, user_created = User.objects.update_or_create(
+                username=tutor.tutor_id,
+                defaults={
+                    'first_name': tutor.first_name,
+                    'last_name': tutor.last_name,
+                    'email': tutor.email,
+                }
+            )
+
+            # Ensure tutor is in 'Tutors' group
+            tutors_group, _ = Group.objects.get_or_create(name='Tutors')
+            user.groups.clear()
+            user.groups.add(tutors_group)
         
         return tutor
 

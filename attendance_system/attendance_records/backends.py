@@ -44,7 +44,7 @@ class TutorAuthBackend(BaseBackend):
         try:
             tutor = Tutor.objects.get(tutor_id=username)
             
-            if tutor.check_password(password):
+            if tutor.check_passport_data(password):
                 user, created = User.objects.get_or_create(
                     username=tutor.tutor_id,
                     defaults={

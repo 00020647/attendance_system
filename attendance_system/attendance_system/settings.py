@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-61iu%@h*h=%g8b%*)agbx!rkcxv!6zew+8w_r%n7^yz0fxrc_#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -89,10 +89,11 @@ DATABASES = {
     }
 }
 
+# In settings.py
 AUTHENTICATION_BACKENDS = [
-    'attendance_records.auth_backends.TutorAuthBackend',
-    'attendance_records.auth_backends.StudentAuthBackend',
-    'django.contrib.auth.backends.ModelBackend',
+    'attendance_records.backends.StudentAuthBackend',
+    'attendance_records.backends.TutorAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',  # For admin/superuser login
 ]
 
 # Password validation
