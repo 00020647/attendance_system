@@ -1,85 +1,96 @@
 {% extends 'attendance_records/base.html' %}
 
-{% block title %}Attendance System{% endblock %}
+{% block title %}Attendance System - Dashboard{% endblock %}
 
 {% block heading %}Attendance System{% endblock %}
 
 {% block content %}
   {% if user.is_authenticated %}
-    <p>Welcome, role: <strong>{{ request.user_role }}</strong></p>
-    <div class="my-3">
+    <div class="dashboard-cards">
       {% if request.user_role == 'student' %}
-        <div style="width:100px;height:100px;background:blue;"></div>
-      {% elif request.user_role == 'tutor' %}
-        <div style="width:100px;height:100px;background:red;"></div>
-      {% elif request.user_role == 'admin' %}
-        <div style="width:100px;height:100px;background:purple;"></div>
-      {% endif %}
-    </div>
-
-    <div class="row mt-4">
-      {% if request.user_role == 'student' %}
-        <div class="col-md-6">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">My Attendance</h5>
-              <p class="card-text">View your attendance records by course.</p>
-              <a href="{% url 'attendance_records:student_dashboard' %}" class="btn btn-primary">View Dashboard</a>
+        <div class="card">
+          <div class="card-body text-center">
+            <div style="font-size: 3rem; color: var(--info); margin-bottom: 1rem;">
+              <i class="bi bi-graph-up"></i>
             </div>
+            <h5 class="card-title">My Attendance</h5>
+            <p class="card-text">View your attendance records by course and track your presence.</p>
+            <a href="{% url 'attendance_records:student_dashboard' %}" class="btn btn-primary">
+              <i class="bi bi-eye"></i> View Dashboard
+            </a>
           </div>
         </div>
       {% elif request.user_role == 'tutor' %}
-        <div class="col-md-6">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Mark Attendance</h5>
-              <p class="card-text">Mark attendance for your students.</p>
-              <a href="{% url 'attendance_records:tutor_mark' %}" class="btn btn-primary">Mark Attendance</a>
+        <div class="card">
+          <div class="card-body text-center">
+            <div style="font-size: 3rem; color: var(--warning); margin-bottom: 1rem;">
+              <i class="bi bi-clipboard-check"></i>
             </div>
+            <h5 class="card-title">Mark Attendance</h5>
+            <p class="card-text">Record attendance for your students by course, semester, and week.</p>
+            <a href="{% url 'attendance_records:tutor_mark' %}" class="btn btn-primary">
+              <i class="bi bi-pencil-square"></i> Mark Attendance
+            </a>
           </div>
         </div>
       {% elif request.user_role == 'admin' %}
-        <div class="col-md-3">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Manage Courses</h5>
-              <p class="card-text">Add, edit, or delete courses.</p>
-              <a href="{% url 'attendance_records:courses_list' %}" class="btn btn-primary">Manage</a>
+        <div class="card">
+          <div class="card-body text-center">
+            <div style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;">
+              <i class="bi bi-book"></i>
             </div>
+            <h5 class="card-title">Manage Courses</h5>
+            <p class="card-text">Create, edit, and delete courses for your institution.</p>
+            <a href="{% url 'attendance_records:courses_list' %}" class="btn btn-primary">
+              <i class="bi bi-gear"></i> Manage Courses
+            </a>
           </div>
         </div>
-        <div class="col-md-3">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Manage Students</h5>
-              <p class="card-text">Add, edit, or delete students.</p>
-              <a href="{% url 'attendance_records:students_list' %}" class="btn btn-primary">Manage</a>
+        <div class="card">
+          <div class="card-body text-center">
+            <div style="font-size: 3rem; color: var(--success); margin-bottom: 1rem;">
+              <i class="bi bi-people"></i>
             </div>
+            <h5 class="card-title">Manage Students</h5>
+            <p class="card-text">Add, edit, or remove student accounts from the system.</p>
+            <a href="{% url 'attendance_records:students_list' %}" class="btn btn-primary">
+              <i class="bi bi-person-plus"></i> Manage Students
+            </a>
           </div>
         </div>
-        <div class="col-md-3">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Manage Tutors</h5>
-              <p class="card-text">Add, edit, or delete tutors.</p>
-              <a href="{% url 'attendance_records:tutors_list' %}" class="btn btn-primary">Manage</a>
+        <div class="card">
+          <div class="card-body text-center">
+            <div style="font-size: 3rem; color: var(--danger); margin-bottom: 1rem;">
+              <i class="bi bi-mortarboard"></i>
             </div>
+            <h5 class="card-title">Manage Tutors</h5>
+            <p class="card-text">Add, edit, or remove tutor accounts from the system.</p>
+            <a href="{% url 'attendance_records:tutors_list' %}" class="btn btn-primary">
+              <i class="bi bi-person-plus"></i> Manage Tutors
+            </a>
           </div>
         </div>
-        <div class="col-md-3">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">View Attendance</h5>
-              <p class="card-text">View all attendance records.</p>
-              <a href="{% url 'attendance_records:attendance_list' %}" class="btn btn-primary">View</a>
+        <div class="card">
+          <div class="card-body text-center">
+            <div style="font-size: 3rem; color: var(--info); margin-bottom: 1rem;">
+              <i class="bi bi-file-text"></i>
             </div>
+            <h5 class="card-title">View Attendance</h5>
+            <p class="card-text">View and manage all attendance records in the system.</p>
+            <a href="{% url 'attendance_records:attendance_list' %}" class="btn btn-primary">
+              <i class="bi bi-list-task"></i> View Records
+            </a>
           </div>
         </div>
       {% endif %}
     </div>
   {% else %}
-    <div class="alert alert-info">
-      <p>Please <a href="{% url 'attendance_records:login' %}" class="alert-link">login</a> to access the system.</p>
+    <div class="alert alert-info mt-5" style="max-width: 500px; margin: 5rem auto; padding: 2rem; text-align: center; border-radius: 10px;">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">
+        <i class="bi bi-lock"></i>
+      </div>
+      <h4>Welcome to Attendance System</h4>
+      <p>Please <a href="{% url 'attendance_records:login' %}" class="alert-link font-weight-bold">login</a> to access the system.</p>
     </div>
   {% endif %}
 {% endblock %}

@@ -1,14 +1,180 @@
 {% extends 'attendance_records/base.html' %}
 
-{% block title %}{% if object %}Edit{% else %}Add{% endif %} Student{% endblock %}
+{% block title %}{% if object %}Edit{% else %}Add{% endif %} Student - Attendance System{% endblock %}
 
-{% block heading %}{% if object %}Edit{% else %}Add{% endif %} Student{% endblock %}
+{% block page_title %}{% if object %}Edit{% else %}Add New{% endif %} Student{% endblock %}
 
 {% block content %}
-  <form method="post" novalidate>
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a class="btn btn-secondary" href="{% url 'attendance_records:students_list' %}">Cancel</a>
-  </form>
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="form-card">
+            <div class="card-header">
+                <h3><i class="bi bi-person-plus"></i> {% if object %}Edit{% else %}Add New{% endif %} Student</h3>
+            </div>
+            
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger mt-3">
+                <strong>Error:</strong>
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+            
+            <form method="post" novalidate>
+                {% csrf_token %}
+                
+                <!-- Basic Information -->
+                <fieldset class="mb-4">
+                    <legend class="mb-3" style="font-size: 1.1rem; font-weight: 600; color: #333;">Basic Information</legend>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name *</label>
+                            <input type="text" 
+                                   name="first_name" 
+                                   value="{{ form.first_name.value|default:'' }}" 
+                                   class="form-control {% if form.first_name.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.first_name.id_for_label }}" 
+                                   required>
+                            {% if form.first_name.errors %}
+                            <div class="invalid-feedback d-block">{{ form.first_name.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name *</label>
+                            <input type="text" 
+                                   name="last_name" 
+                                   value="{{ form.last_name.value|default:'' }}" 
+                                   class="form-control {% if form.last_name.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.last_name.id_for_label }}" 
+                                   required>
+                            {% if form.last_name.errors %}
+                            <div class="invalid-feedback d-block">{{ form.last_name.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.student_id.id_for_label }}" class="form-label">Student ID *</label>
+                            <input type="text" 
+                                   name="student_id" 
+                                   value="{{ form.student_id.value|default:'' }}" 
+                                   class="form-control {% if form.student_id.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.student_id.id_for_label }}" 
+                                   required>
+                            {% if form.student_id.errors %}
+                            <div class="invalid-feedback d-block">{{ form.student_id.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted d-block mt-1">Unique identifier used for login</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                            <input type="email" 
+                                   name="email" 
+                                   value="{{ form.email.value|default:'' }}" 
+                                   class="form-control {% if form.email.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.email.id_for_label }}">
+                            {% if form.email.errors %}
+                            <div class="invalid-feedback d-block">{{ form.email.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Security -->
+                <fieldset class="mb-4">
+                    <legend class="mb-3" style="font-size: 1.1rem; font-weight: 600; color: #333;">Security</legend>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.passport_data.id_for_label }}" class="form-label">
+                                Passport Data {% if not object %}*{% endif %}
+                            </label>
+                            <input type="password" 
+                                   name="passport_data" 
+                                   class="form-control {% if form.passport_data.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.passport_data.id_for_label }}" 
+                                   {% if not object %}required{% endif %}>
+                            {% if form.passport_data.errors %}
+                            <div class="invalid-feedback d-block">{{ form.passport_data.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted d-block mt-1">Will be encrypted securely</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.passport_data_confirm.id_for_label }}" class="form-label">
+                                Confirm Passport Data
+                            </label>
+                            <input type="password" 
+                                   name="passport_data_confirm" 
+                                   class="form-control {% if form.passport_data_confirm.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.passport_data_confirm.id_for_label }}">
+                            {% if form.passport_data_confirm.errors %}
+                            <div class="invalid-feedback d-block">{{ form.passport_data_confirm.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Courses -->
+                <fieldset class="mb-4">
+                    <legend class="mb-3" style="font-size: 1.1rem; font-weight: 600; color: #333;">Enrolled Courses</legend>
+                    <div class="courses-checkboxes">
+                        {{ form.courses }}
+                    </div>
+                    {% if form.courses.errors %}
+                    <div class="text-danger mt-2">{{ form.courses.errors }}</div>
+                    {% endif %}
+                </fieldset>
+                
+                <!-- Form Actions -->
+                <div class="d-flex justify-content-between gap-2 mt-4">
+                    <a href="{% url 'attendance_records:students_list' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> {% if object %}Update{% else %}Create{% endif %} Student
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .courses-checkboxes ul {
+        list-style: none;
+        padding-left: 0;
+    }
+    
+    .courses-checkboxes li {
+        margin-bottom: 0.75rem;
+    }
+    
+    .courses-checkboxes label {
+        margin-left: 0.5rem;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 0;
+    }
+    
+    .courses-checkboxes input[type="checkbox"] {
+        margin-top: 0.25rem;
+    }
+    
+    fieldset {
+        border: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    legend {
+        padding: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+</style>
 {% endblock %}

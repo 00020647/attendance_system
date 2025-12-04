@@ -1,49 +1,73 @@
 {% extends 'attendance_records/base.html' %}
 
-{% block title %}Attendance Records{% endblock %}
+{% block title %}Attendance Records - Attendance System{% endblock %}
 
-{% block heading %}Attendance Records{% endblock %}
+{% block page_title %}Attendance Records{% endblock %}
 
 {% block content %}
-  <div class="mb-3">Role: {{ request.user_role }}</div>
-  {% if request.user_role == 'student' %}
-    <div style="width:100px;height:100px;background:blue;margin-bottom:12px;"></div>
-  {% elif request.user_role == 'tutor' %}
-    <div style="width:100px;height:100px;background:red;margin-bottom:12px;"></div>
-  {% elif request.user_role == 'admin' %}
-    <div style="width:100px;height:100px;background:purple;margin-bottom:12px;"></div>
+  {% if request.user_role != 'admin' %}
+  <div class="mb-4">
+    <a class="btn btn-primary" href="{% url 'attendance_records:attendance_add' %}">
+      <i class="bi bi-plus-circle"></i> Add New Record
+    </a>
+  </div>
   {% endif %}
 
-  <p>
-    <a class="btn btn-primary" href="{% url 'attendance_records:attendance_add' %}">Add Record</a>
-    <a class="btn btn-secondary" href="{% url 'attendance_records:index' %}">Home</a>
-  </p>
-
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Student</th>
-        <th>Course</th>
-        <th>Status</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for r in records %}
-      <tr>
-        <td>{{ r.date }}</td>
-        <td>{{ r.student }}</td>
-        <td>{{ r.course }}</td>
-        <td>{{ r.get_status_display }}</td>
-        <td>
-          <a class="btn btn-sm btn-outline-secondary" href="{% url 'attendance_records:attendance_edit' r.pk %}">Edit</a>
-          <a class="btn btn-sm btn-outline-danger" href="{% url 'attendance_records:attendance_delete' r.pk %}">Delete</a>
-        </td>
-      </tr>
-    {% empty %}
-      <tr><td colspan="5">No records yet.</td></tr>
-    {% endfor %}
-    </tbody>
-  </table>
+  {% if records %}
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th><i class="bi bi-calendar"></i> Date</th>
+          <th><i class="bi bi-person"></i> Student</th>
+          <th><i class="bi bi-book"></i> Course</th>
+          <th><i class="bi bi-check-circle"></i> Status</th>
+          <th style="text-align: center;"><i class="bi bi-gear"></i> Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for r in records %}
+        <tr>
+          <td>{{ r.date|default:"—" }}</td>
+          <td>{{ r.student }}</td>
+          <td>{{ r.course }}</td>
+          <td>
+            <span class="badge {% if r.status == 'P' %}bg-success{% elif r.status == 'A' %}bg-danger{% else %}bg-warning{% endif %}">
+              {{ r.get_status_display }}
+            </span>
+          </td>
+          <td style="text-align: center;">
+            {% if request.user_role != 'admin' %}
+            <a class="btn btn-sm btn-outline-secondary" href="{% url 'attendance_records:attendance_edit' r.pk %}" title="Edit">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <a class="btn btn-sm btn-outline-danger" href="{% url 'attendance_records:attendance_delete' r.pk %}" title="Delete">
+              <i class="bi bi-trash"></i>
+            </a>
+            {% else %}
+            <span class="text-muted">View only</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="alert alert-info text-center" style="padding: 3rem;">
+    <i class="bi bi-inbox" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+    <h5>No Attendance Records Yet</h5>
+    {% if request.user_role == 'admin' %}
+      <p>Use the <strong>Mark Attendance</strong> feature from the dashboard to record student attendance.</p>
+      <a class="btn btn-primary" href="{% url 'attendance_records:tutor_mark' %}">
+        <i class="bi bi-clipboard2-check"></i> Mark Attendance
+      </a>
+    {% else %}
+      <p>Get started by adding your first attendance record.</p>
+      <a class="btn btn-primary" href="{% url 'attendance_records:attendance_add' %}">
+        <i class="bi bi-plus-circle"></i> Add Record
+      </a>
+    {% endif %}
+  </div>
+  {% endif %}
 {% endblock %}
