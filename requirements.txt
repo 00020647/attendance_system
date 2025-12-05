@@ -8,3 +8,5 @@ django-cors-headers==4.3.0
 python-decouple==3.8
 django-filter==23.3
 mysqlclient
+whitenoise==6.6.0
+cryptography
