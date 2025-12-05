@@ -1,5 +1,6 @@
 from pathlib import Path
 import pymysql
+import dj_database_url
 
 pymysql.install_as_MySQLdb()
 
@@ -51,14 +52,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'attendance_system.wsgi.application'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'attendance_system',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '3306',
-    }
+    "default": dj_database_url.parse(os.environ["DATABASE_URL"])
 }
 
 # In settings.py
@@ -69,8 +63,6 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
