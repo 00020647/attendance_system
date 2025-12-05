@@ -65,26 +65,6 @@
           </table>
         </div>
         
-        <div class="card mt-4">
-          <div class="card-body">
-            <h5 class="card-title"><i class="bi bi-graph-up"></i> Attendance Summary</h5>
-            <div class="row">
-              <div class="col-md-6">
-                <ul class="list-unstyled">
-                  <li class="mb-2">
-                    <strong>Total Classes:</strong> {{ attendance_records|length }}
-                  </li>
-                  <li class="mb-2">
-                    <strong>Present:</strong> 
-                    <span class="badge bg-success">
-                      {{ attendance_records|dictsort:"status"|length }} days
-                    </span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
       {% else %}
         <div class="alert alert-info text-center" style="padding: 2rem;">
           <i class="bi bi-inbox" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
