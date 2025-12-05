@@ -18,9 +18,10 @@
     <table class="table table-striped">
       <thead>
         <tr>
-          <th><i class="bi bi-calendar"></i> Date</th>
           <th><i class="bi bi-person"></i> Student</th>
           <th><i class="bi bi-book"></i> Course</th>
+          <th><i class="bi bi-calendar-week"></i> Semester</th>
+          <th><i class="bi bi-hash"></i> Week</th>
           <th><i class="bi bi-check-circle"></i> Status</th>
           <th style="text-align: center;"><i class="bi bi-gear"></i> Actions</th>
         </tr>
@@ -28,9 +29,10 @@
       <tbody>
       {% for r in records %}
         <tr>
-          <td>{{ r.date|default:"—" }}</td>
           <td>{{ r.student }}</td>
           <td>{{ r.course }}</td>
+          <td>{{ r.get_semester_display }}</td>
+          <td>Week {{ r.week }}</td>
           <td>
             <span class="badge {% if r.status == 'P' %}bg-success{% elif r.status == 'A' %}bg-danger{% else %}bg-warning{% endif %}">
               {{ r.get_status_display }}

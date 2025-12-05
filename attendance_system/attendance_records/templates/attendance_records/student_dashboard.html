@@ -43,22 +43,22 @@
           <table class="table table-striped">
             <thead>
               <tr>
-                <th><i class="bi bi-calendar"></i> Date</th>
+                <th><i class="bi bi-calendar-week"></i> Semester</th>
+                <th><i class="bi bi-hash"></i> Week</th>
                 <th><i class="bi bi-check-circle"></i> Status</th>
-                <th><i class="bi bi-chat-left-text"></i> Notes</th>
               </tr>
             </thead>
             <tbody>
               {% for record in attendance_records %}
                 <tr>
-                  <td>{{ record.date|default:"—" }}</td>
+                  <td>{{ record.get_semester_display }}</td>
+                  <td>Week {{ record.week }}</td>
                   <td>
                     <span class="badge {% if record.status == 'P' %}bg-success{% elif record.status == 'A' %}bg-danger{% else %}bg-warning{% endif %}">
                       <i class="bi {% if record.status == 'P' %}bi-check-circle{% elif record.status == 'A' %}bi-x-circle{% else %}bi-exclamation-circle{% endif %}"></i>
                       {{ record.get_status_display }}
                     </span>
                   </td>
-                  <td>{{ record.notes|default:"—" }}</td>
                 </tr>
               {% endfor %}
             </tbody>

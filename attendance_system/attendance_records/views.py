@@ -175,7 +175,7 @@ class CourseForm(forms.ModelForm):
 class AttendanceForm(forms.ModelForm):
     class Meta:
         model = AttendanceRecord
-        fields = ['student', 'course', 'semester', 'week', 'status', 'notes']
+        fields = ['student', 'course', 'semester', 'week', 'status']
 
 
 class RoleContextMixin:
@@ -287,7 +287,7 @@ class StudentDashboardView(RoleContextMixin, generic.TemplateView):
             records = AttendanceRecord.objects.filter(
                 student__student_id=self.request.user.username,
                 course=selected_course
-            ).order_by('-date')
+            ).order_by('-semester', '-week')
             context['attendance_records'] = records
 
         return context
@@ -344,18 +344,26 @@ class TutorMarkAttendanceView(TutorAdminRequiredMixin, RoleContextMixin, generic
         
         for student in students:
             status = request.POST.get(f'status_{student.id}')
-            notes = request.POST.get(f'notes_{student.id}', '')
+            remove = request.POST.get(f'remove_{student.id}')
 
-            if status:
+            if remove:
+                # Delete attendance record if "Remove Attendance" was clicked
+                AttendanceRecord.objects.filter(
+                    student=student,
+                    course=course,
+                    semester=semester,
+                    week=week
+                ).delete()
+            elif status:
+                # Update or create attendance record
                 record, _ = AttendanceRecord.objects.get_or_create(
                     student=student,
                     course=course,
                     semester=semester,
                     week=week,
-                    defaults={'status': status, 'notes': notes}
+                    defaults={'status': status}
                 )
                 record.status = status
-                record.notes = notes
                 record.save()
 
         return redirect(f"{reverse_lazy('attendance_records:tutor_mark')}?course={course_id}&semester={semester}&week={week}")

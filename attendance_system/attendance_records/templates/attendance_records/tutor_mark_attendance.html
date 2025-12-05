@@ -82,7 +82,7 @@
                   <td><strong>{{ student.student_id }}</strong></td>
                   <td>{{ student.first_name }} {{ student.last_name }}</td>
                   <td>
-                    <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <div class="d-flex gap-2 justify-content-center flex-wrap align-items-center">
                       <div class="form-check">
                         <input class="form-check-input radio-deselect" type="radio" name="status_{{ student.id }}" 
                                id="present_{{ student.id }}" value="P" 
@@ -107,6 +107,11 @@
                           <i class="bi bi-exclamation-circle text-warning"></i> Excused
                         </label>
                       </div>
+                      {% if record %}
+                        <button type="submit" name="remove_{{ student.id }}" value="1" class="btn btn-sm btn-outline-danger" title="Remove attendance record">
+                          <i class="bi bi-trash"></i> Remove
+                        </button>
+                      {% endif %}
                     </div>
                   </td>
                 </tr>
