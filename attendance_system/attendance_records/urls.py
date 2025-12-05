@@ -1,5 +1,3 @@
-# attendance_records/urls.py
-
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from rest_framework.routers import DefaultRouter
@@ -8,7 +6,6 @@ from . import api_views
 
 app_name = 'attendance_records'
 
-# API Router - automatically creates routes for viewsets
 router = DefaultRouter()
 router.register(r'students', api_views.StudentViewSet, basename='api-student')
 router.register(r'courses', api_views.CourseViewSet, basename='api-course')

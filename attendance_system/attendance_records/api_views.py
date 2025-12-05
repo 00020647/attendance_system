@@ -1,8 +1,3 @@
-# attendance_records/api_views.py
-"""
-API Views - Handle API requests and return JSON responses
-"""
-
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
@@ -13,25 +8,16 @@ from .serializers import (
     StudentSerializer,
     CourseSerializer,
     AttendanceRecordSerializer,
-    AttendanceRecordSimpleSerializer
 )
 
 
 class StudentViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    API endpoint for students
-    - List all students: GET /api/students/
-    - Get specific student: GET /api/students/{id}/
-    """
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
     permission_classes = [IsAuthenticated]
     
-    # Enable search by student_id, name, email
     def get_queryset(self):
         queryset = Student.objects.all()
-        
-        # Search functionality
         search = self.request.query_params.get('search', None)
         if search:
             queryset = queryset.filter(
@@ -40,23 +26,15 @@ class StudentViewSet(viewsets.ReadOnlyModelViewSet):
                 Q(last_name__icontains=search) |
                 Q(email__icontains=search)
             )
-        
         return queryset.order_by('last_name', 'first_name')
     
     @action(detail=True, methods=['get'])
     def attendance(self, request, pk=None):
-        """
-        Get attendance records for specific student
-        GET /api/students/{id}/attendance/
-        """
         student = self.get_object()
-        records = student.attendances.all().order_by('-date')
-        
-        # Filter by course if provided
+        records = student.attendances.all().order_by('-created_at')
         course_id = request.query_params.get('course', None)
         if course_id:
             records = records.filter(course_id=course_id)
-        
         serializer = AttendanceRecordSimpleSerializer(records, many=True)
         return Response(serializer.data)
 
@@ -73,85 +51,48 @@ class CourseViewSet(viewsets.ReadOnlyModelViewSet):
     
     def get_queryset(self):
         queryset = Course.objects.all()
-        
-        # Search functionality
         search = self.request.query_params.get('search', None)
         if search:
             queryset = queryset.filter(
                 Q(code__icontains=search) |
                 Q(name__icontains=search)
             )
-        
         return queryset.order_by('code')
     
     @action(detail=True, methods=['get'])
     def attendance(self, request, pk=None):
-        """
-        Get attendance records for specific course
-        GET /api/courses/{id}/attendance/
-        """
         course = self.get_object()
-        records = course.attendances.all().order_by('-date', 'student__last_name')
-        
-        # Filter by date if provided
+        records = course.attendances.all().order_by('-created_at', 'student__last_name')
         date = request.query_params.get('date', None)
         if date:
-            records = records.filter(date=date)
-        
+            records = records.filter(created_at__date=date)
         serializer = AttendanceRecordSimpleSerializer(records, many=True)
         return Response(serializer.data)
 
 
 class AttendanceRecordViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint for attendance records
-    - List all records: GET /api/attendance/
-    - Create record: POST /api/attendance/
-    - Get specific record: GET /api/attendance/{id}/
-    - Update record: PUT /api/attendance/{id}/
-    - Delete record: DELETE /api/attendance/{id}/
-    """
     queryset = AttendanceRecord.objects.all()
+    serializer_class = AttendanceRecordSerializer
     permission_classes = [IsAuthenticated]
-    
-    def get_serializer_class(self):
-        # Use simple serializer for list, detailed for single items
-        if self.action == 'list':
-            return AttendanceRecordSimpleSerializer
-        return AttendanceRecordSerializer
     
     def get_queryset(self):
         queryset = AttendanceRecord.objects.all()
-        
-        # Filter by student
         student_id = self.request.query_params.get('student', None)
         if student_id:
             queryset = queryset.filter(student_id=student_id)
-        
-        # Filter by course
         course_id = self.request.query_params.get('course', None)
         if course_id:
             queryset = queryset.filter(course_id=course_id)
-        
-        # Filter by date
         date = self.request.query_params.get('date', None)
         if date:
-            queryset = queryset.filter(date=date)
-        
-        # Filter by status
+            queryset = queryset.filter(created_at__date=date)
         status_param = self.request.query_params.get('status', None)
         if status_param:
             queryset = queryset.filter(status=status_param)
-        
-        return queryset.order_by('-date', 'student__last_name')
+        return queryset.order_by('-created_at', 'student__last_name')
     
     def get_permissions(self):
-        """
-        Only allow tutors/admins to create/update/delete
-        Students can only read
-        """
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            # Check if user is staff or in Tutors group
             permission_classes = [IsAuthenticated, IsTutorOrAdmin]
         else:
             permission_classes = [IsAuthenticated]
@@ -159,9 +100,6 @@ class AttendanceRecordViewSet(viewsets.ModelViewSet):
 
 
 class IsTutorOrAdmin(permissions.BasePermission):
-    """
-    Custom permission: only tutors and admins can modify attendance
-    """
     def has_permission(self, request, view):
         return (
             request.user.is_staff or
@@ -173,21 +111,13 @@ class IsTutorOrAdmin(permissions.BasePermission):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def my_attendance(request):
-    """
-    Get attendance records for the currently logged-in student
-    GET /api/my-attendance/
-    """
     try:
-        # Find student by username
         student = Student.objects.get(student_id=request.user.username)
-        records = student.attendances.all().order_by('-date')
-        
-        # Filter by course if provided
+        records = student.attendances.all().order_by('-created_at')
         course_id = request.query_params.get('course', None)
         if course_id:
             records = records.filter(course_id=course_id)
-        
-        serializer = AttendanceRecordSimpleSerializer(records, many=True)
+        serializer = AttendanceRecordSerializer(records, many=True)
         return Response({
             'student': StudentSerializer(student).data,
             'attendance_records': serializer.data
@@ -202,10 +132,6 @@ def my_attendance(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def api_stats(request):
-    """
-    Get overall statistics
-    GET /api/stats/
-    """
     total_students = Student.objects.count()
     total_courses = Course.objects.count()
     total_records = AttendanceRecord.objects.count()
